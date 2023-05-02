@@ -1,0 +1,29 @@
+.wrapper {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  gap: 8px;
+  border: 1px solid grey;
+  width: 360px;
+  padding: 12px;
+  border-radius: 6px;
+}
+.wrapper > li {
+  display: flex;
+  justify-content: space-between;
+}
+.button {
+  width: 100px;
+  height: 30px;
+  border-radius: 6px;
+}
+.button:hover {
+  background-color: grey;
+  color: white;
+  cursor: pointer;
+}
+.button:active {
+  scale: 0.95;
+}
