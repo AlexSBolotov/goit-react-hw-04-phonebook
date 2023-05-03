@@ -3,69 +3,45 @@ import { StartState } from 'const/const';
 import Filter from './Filter/Filter';
 import ContactList from './ContactList/ContactList';
 import { nanoid } from 'nanoid';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
-  // =================LIFE CYCLE METHODS===========================
-  componentDidMount() {
-    const localContacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(localContacts) || StartState;
-    this.setState({ contacts: parsedContacts });
-    // if (parsedContacts) {
-    //   this.setState({ contacts: parsedContacts });
-    // }
-  }
-  componentDidUpdate(prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-  // ====================MAIN METHODS==============================
-  addContact = data => {
-    this.isNamesDublicated(data.name)
+export function App() {
+  const [contacts, setContacts] = useState(() => {
+    const parsedContacts = JSON.parse(localStorage.getItem('contacts'));
+    return parsedContacts ? parsedContacts : StartState;
+  });
+  const [filter, setFilter] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  const addContact = data => {
+    isNamesDublicated(data.name)
       ? alert(`${data.name} is already in contacts.`)
-      : this.setState(prevState => ({
-          contacts: [...prevState.contacts, { ...data, id: nanoid() }],
-        }));
+      : setContacts(prevState => [...prevState, { ...data, id: nanoid() }]);
   };
-  removeContact = id => {
-    this.setState(prev => ({
-      contacts: prev.contacts.filter(contact => contact.id !== id),
-    }));
+  const isNamesDublicated = name => {
+    return contacts.some(el => el.name.toLowerCase() === name.toLowerCase());
   };
-  filterContacts = () => {
-    const { filter, contacts } = this.state;
+  const filterContacts = () => {
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter.toLowerCase())
     );
   };
-  // ==================ADDITIONAL METHODS==========================
-  onFilterInputChange = name => {
-    this.setState({ filter: name });
+  const filteredContacts = filterContacts();
+  const removeContact = id => {
+    setContacts(prev => prev.filter(contact => contact.id !== id));
   };
-  isNamesDublicated = name =>
-    this.state.contacts.some(
-      el => el.name.toLowerCase() === name.toLowerCase()
-    );
 
-  render() {
-    const filteredContacts = this.filterContacts();
-    return (
-      <main>
-        <h1>Phonebook</h1>
-        <ContactForm addContact={this.addContact} />
+  return (
+    <main>
+      <h1>Phonebook</h1>
+      <ContactForm addContact={addContact} />
 
-        <h2>Contacts</h2>
-        <Filter onFilterInputChange={this.onFilterInputChange} />
-        <ContactList
-          contacts={filteredContacts}
-          removeContact={this.removeContact}
-        />
-      </main>
-    );
-  }
+      <h2>Contacts</h2>
+      <Filter onFilterInputChange={setFilter} />
+      <ContactList contacts={filteredContacts} removeContact={removeContact} />
+    </main>
+  );
 }
